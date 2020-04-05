@@ -1,9 +1,5 @@
-# docker-apache-php-composer
-Basic boilepate to start working with apache and PHP in docker
-
-# Build image 
-replace "myapp" with any name you like
-don't foget the " ." at the end ;-)
+# docker-apache-php-composer-drupal8
+This is a fork of SpiralOutDotEu/docker-apache-php-composer that I have modified to use php7 and to automatically install drupal8 with composer
 ```
 $docker build -t myapp .
 ```
