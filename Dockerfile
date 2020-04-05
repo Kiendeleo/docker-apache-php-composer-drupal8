@@ -12,10 +12,10 @@ RUN apt-get update && \
 	php7.2-mysql \
 	php7.2-gd \
 	php-pear \
-	php-apc \
+	php-apcu \
 	php7.2-json \
 	php7.2-curl \
-	curl lynx-cur \
+	curl lynx-common lynx \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y
 # Install composer for PHP dependencies
