@@ -1,8 +1,6 @@
 # docker-apache-php-composer-drupal8
 This is a fork of SpiralOutDotEu/docker-apache-php-composer that I have modified to use php7 and to automatically install drupal8 with composer
 ```
-$docker build -t myapp .
-```
 # Run the container to see that is working ok
 ```
 $docker run -p 8080:80 -d myapp
