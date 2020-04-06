@@ -40,8 +40,9 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 
 EXPOSE 80
 
-# Copy site into place.
-ADD www /var/www/site
+# Make working directories.
+RUN mkdir /var/www/site
+RUN mkdir /var/www/site/public
 
 # Create Drupal 8 site using Composer
 RUN composer create-project drupal/recommended-project /var/www/site/public
