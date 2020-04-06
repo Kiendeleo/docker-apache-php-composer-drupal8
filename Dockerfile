@@ -43,15 +43,15 @@ EXPOSE 80
 # Copy site into place.
 ADD www /var/www/site
 
+# Create Drupal 8 site using Composer
+RUN composer create-project drupal/recommended-project /var/www/site/public
+RUN cd /var/www/site/public && composer require drush/drush
+
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
 # By default, simply start apache.
 CMD /usr/sbin/apache2ctl -D FOREGROUND
-
-# Create Drupal 8 site using Composer
-RUN composer create-project drupal/recommended-project /var/www/site/public
-RUN cd /var/www/site/public && composer require drush/drush
 
 # expose container at port 80
 EXPOSE 80
