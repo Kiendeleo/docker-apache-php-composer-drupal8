@@ -1,5 +1,16 @@
 # docker-apache-php-composer-drupal8
+How to use this container
 
+docker run -d -p 80:80 -n AppName kiendeleo / drupalcomposer:latest
+
+# Persistance Volumes
+Apache directives apache:/etc/apache2/sites-enabled/
+PHP.ini: php:/etc/php/7.2/apache2/
+Site Files: d8:/var/www/site
+
+# Things still left to do:
+- SSH (Self signed cert)
+- check for created site before running composer command
 
 # Credits
 Based on what i've learned from this:
