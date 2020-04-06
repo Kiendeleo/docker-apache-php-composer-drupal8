@@ -47,5 +47,8 @@ ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 # By default, simply start apache.
 CMD /usr/sbin/apache2ctl -D FOREGROUND
 
+# Create Drupal 8 site using Composer
+RUN composer create-project drupal/recommended-project /var/www/site
+
 # expose container at port 80
 EXPOSE 80
