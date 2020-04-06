@@ -16,8 +16,10 @@ RUN apt-get update && \
 	php7.2-json \
 	php7.2-curl \
 	curl lynx-common lynx \
+	php7.2-mbstring \
+	unzip \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& apt-get clean -y
+	&& apt-get clean -y 
 # Install composer for PHP dependencies
 RUN cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
@@ -39,7 +41,7 @@ ENV APACHE_PID_FILE /var/run/apache2.pid
 EXPOSE 80
 
 # Copy site into place.
-# ADD www /var/www/site
+ADD www /var/www/site
 
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
@@ -48,7 +50,8 @@ ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 CMD /usr/sbin/apache2ctl -D FOREGROUND
 
 # Create Drupal 8 site using Composer
-RUN composer create-project drupal/recommended-project /var/www/site
+RUN composer create-project drupal/recommended-project /var/www/site/public
+RUN cd /var/www/site/public && composer require drush/drush
 
 # expose container at port 80
 EXPOSE 80
