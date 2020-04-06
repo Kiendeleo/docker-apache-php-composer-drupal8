@@ -22,7 +22,7 @@ RUN apt-get update && \
 RUN cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
 # Enable apache mods.
-RUN a2enmod php7
+RUN a2enmod php7.2
 RUN a2enmod rewrite
 
 # Update the PHP.ini file, enable <? ?> tags and quieten logging.
