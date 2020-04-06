@@ -1,7 +1,7 @@
 # docker-apache-php-composer-drupal8
 How to use this container
 
-docker run -d -p 80:80 -n AppName kiendeleo/drupalcomposer:latest
+docker run -d -p 80:80 --name AppName kiendeleo/drupalcomposer:latest
 
 # Persistance Volumes
 Apache directives apache:/etc/apache2/sites-enabled/
