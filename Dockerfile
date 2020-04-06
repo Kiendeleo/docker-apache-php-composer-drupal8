@@ -1,6 +1,6 @@
-FROM ubuntu:latest
+FROM ubuntu:18.04
 
-MAINTAINER Spiral Out <spiralout.eu@gmail.com>
+MAINTAINER Kiendeleo <kiendeleo.com>
 
 # disable interactive functions. 
 ENV DEBIAN_FRONTEND noninteractive
