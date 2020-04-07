@@ -1,18 +1,21 @@
-# docker-apache-php-composer-drupal8
-How to use this container
+# Drupal Composer
+This container starts with a Ubuntu Server image and layers on apache2, php7.2 and composer.  It then creates Drupal 8 website using Composer.
+
+## How to use this container
 
 docker run -d -p 80:80 --name AppName kiendeleo/drupalcomposer:latest
 
-# Persistance Volumes
+## Persistance Volumes
 - Apache directives: apache:/etc/apache2/sites-enabled/
 - PHP.ini: php:/etc/php/7.2/apache2/
 - Site Files: d8:/var/www/site/
+- Run command for Persistance: docker run -d -v d8:/var/www/site -v php:/etc/php/7.2/apache2/ -v apache:/etc/apache2/sites-enabled/ kiendeleo/drupalcomposer:latest
 
-# Things still left to do:
+## Things still left to do:
 - SSH (Self signed cert)
 - check for created site before running composer command
 
-# Credits
+## Credits
 Based on what i've learned from this:
 - [SpiralOutDotEu/docker-apache-php-composer](https://github.com/SpiralOutDotEu/docker-apache-php-composer)
 - [nimmis/apache-php5](https://hub.docker.com/r/nimmis/apache-php5/~/dockerfile/)
