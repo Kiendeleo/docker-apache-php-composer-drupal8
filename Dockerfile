@@ -48,6 +48,9 @@ RUN mkdir /var/www/site/public
 RUN composer create-project drupal/recommended-project /var/www/site/public
 RUN cd /var/www/site/public && composer require drush/drush
 
+# Adjust File Permissions 
+RUN chown -R www-data:www-data /var/www/site/public/web
+
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
