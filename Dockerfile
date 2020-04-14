@@ -11,6 +11,7 @@ RUN apt-get update && \
 	libapache2-mod-php7.2 \
 	php7.2-mysql \
 	php7.2-gd \
+	php7.2-bcmath \
 	php-pear \
 	php-apcu \
 	php7.2-json \
