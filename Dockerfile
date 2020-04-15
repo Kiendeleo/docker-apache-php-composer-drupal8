@@ -12,6 +12,7 @@ RUN apt-get update && \
 	php7.2-mysql \
 	php7.2-gd \
 	php7.2-bcmath \
+	php7.2-soap \
 	php-pear \
 	php-apcu \
 	php7.2-json \
