@@ -1,9 +1,16 @@
 # Drupal Composer
 This container starts with a Ubuntu Server image and layers on apache2, php7.2 and composer.  It then creates Drupal 8 website using Composer.
 
+## Tags
+`18.04` This version runs on Ubuntu 18.04 and installs Drupal 8
+
+`20.04` This version runs on Ubuntu 20.04 and installs Drupal 9
+
+`latest` This is the latest version, shoul should not use the latest tag as it may break your server when a new LTS release of Ubuntu comes out
+
 ## How to use this container
 
-docker run -d -p 80:80 --name AppName kiendeleo/drupalcomposer:latest
+docker run -d -p 80:80 --name [AppName] kiendeleo/drupalcomposer:[Tag]
 
 ## Persistance Volumes
 - Apache directives: apache:/etc/apache2/sites-enabled/
