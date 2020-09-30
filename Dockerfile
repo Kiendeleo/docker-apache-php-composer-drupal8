@@ -22,6 +22,10 @@ RUN apt-get update && \
 	unzip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y 
+
+# Add the temp folder for composers's cache
+RUN mkdir /var/www/.composer/
+
 # Install composer for PHP dependencies
 RUN cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
 
@@ -47,11 +51,12 @@ RUN mkdir /var/www/site
 RUN mkdir /var/www/site/public
 
 # Create Drupal 8 site using Composer
-RUN composer create-project drupal/recommended-project /var/www/site/public
+RUN composer create-project drupal/recommended-project:8.*.* /var/www/site/public
 RUN cd /var/www/site/public && composer require drush/drush
 
 # Adjust File Permissions 
-RUN chown -R www-data:www-data /var/www/site/public/web
+RUN chown -R www-data:www-data /var/www/site/public/
+RUN chown -R www-data:www-data /var/www/.composer/
 
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
