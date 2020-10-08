@@ -58,6 +58,8 @@ RUN cd /var/www/site/public && composer require drush/drush
 # Adjust File Permissions 
 RUN chown -R www-data:www-data /var/www/site/public/
 RUN chown -R www-data:www-data /var/www/.composer/
+RUN cd /var/www/site/public && find . -type d -exec chmod u=rwx,g=rx,o= '{}' \;
+RUN cd /var/www/site/public && find . -type f -exec chmod u=rw,g=r,o= '{}' \;
 
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
