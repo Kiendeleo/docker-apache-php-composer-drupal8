@@ -19,6 +19,8 @@ RUN apt-get update && \
 	php7.4-curl \
 	curl lynx-common lynx \
 	php7.4-mbstring \
+	php7.4-zip \
+	php7.4-uploadprogress \
 	unzip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y 
