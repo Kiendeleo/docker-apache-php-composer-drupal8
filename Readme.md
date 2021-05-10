@@ -14,13 +14,12 @@ docker run -d -p 80:80 --name [AppName] kiendeleo/drupalcomposer:[Tag]
 
 ## Persistance Volumes
 - Apache directives: apache:/etc/apache2/sites-enabled/
-- PHP.ini: php:/etc/php/7.2/apache2/
-- Site Files: d8:/var/www/site/
-- Run command for Persistance: docker run -d -v d8:/var/www/site -v php:/etc/php/7.2/apache2/ -v apache:/etc/apache2/sites-enabled/ kiendeleo/drupalcomposer:latest
+- PHP.ini: php:/etc/php/
+- Site Files: drupal:/var/www/site/
+- Run command for Persistance: docker run -d -v drupal:/var/www/site -v php:/etc/php/ -v apache:/etc/apache2/sites-enabled/ kiendeleo/drupalcomposer:latest
 
 ## Things still left to do:
 - SSH (Self signed cert)
-- check for created site before running composer command
 
 ## Credits
 Based on what i've learned from this:
