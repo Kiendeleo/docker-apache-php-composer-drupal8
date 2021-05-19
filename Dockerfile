@@ -19,6 +19,8 @@ RUN apt-get update && \
 	php7.4-curl \
 	curl lynx-common lynx \
 	php7.4-mbstring \
+	php7.4-zip \
+	php7.4-uploadprogress \
 	unzip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y 
@@ -56,6 +58,8 @@ RUN cd /var/www/site/public && composer require drush/drush
 # Adjust File Permissions 
 RUN chown -R www-data:www-data /var/www/site/public/
 RUN chown -R www-data:www-data /var/www/.composer/
+RUN cd /var/www/site/public && find . -type d -exec chmod u=rwx,g=rx,o= '{}' \;
+RUN cd /var/www/site/public && find . -type f -exec chmod u=rw,g=r,o= '{}' \;
 
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
