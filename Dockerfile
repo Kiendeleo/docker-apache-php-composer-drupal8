@@ -22,6 +22,7 @@ RUN apt-get update && \
 	php7.4-zip \
 	php7.4-uploadprogress \
 	unzip \
+	git \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y 
 # Install composer for PHP dependencies
@@ -52,6 +53,7 @@ RUN mkdir /var/www/site/public
 # Create Drupal 8 site using Composer
 RUN composer create-project drupal/recommended-project /var/www/site/public
 RUN cd /var/www/site/public && composer require drush/drush
+RUN cd /var/www/site/public && composer install --prefer-dist
 
 # Adjust File Permissions 
 RUN chown -R www-data:www-data /var/www/site/public/
