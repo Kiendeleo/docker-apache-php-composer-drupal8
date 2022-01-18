@@ -23,6 +23,8 @@ RUN apt-get update && \
 	php7.4-uploadprogress \
 	unzip \
 	git \
+	nano \
+	wget \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y 
 # Install composer for PHP dependencies
