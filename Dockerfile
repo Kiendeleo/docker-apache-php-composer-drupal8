@@ -15,7 +15,7 @@ RUN apt-get update && \
 	php8.1-soap \
 	php-pear \
 	php-apcu \
-	php8.1-json \
+	php8.1-fpm \
 	php8.1-curl \
 	curl lynx-common lynx \
 	php8.1-mbstring \
