@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:22.04
 
 MAINTAINER Kiendeleo <kiendeleo.com>
 
@@ -9,18 +9,18 @@ ENV DEBIAN_FRONTEND noninteractive
 RUN apt-get update && \
 	apt-get install -y apache2 \
 	libapache2-mod-php7.4 \
-	php7.4-mysql \
-	php7.4-gd \
-	php7.4-bcmath \
-	php7.4-soap \
+	php8.1-mysql \
+	php8.1-gd \
+	php8.1-bcmath \
+	php8.1-soap \
 	php-pear \
 	php-apcu \
-	php7.4-json \
-	php7.4-curl \
+	php8.1-json \
+	php8.1-curl \
 	curl lynx-common lynx \
-	php7.4-mbstring \
-	php7.4-zip \
-	php7.4-uploadprogress \
+	php8.1-mbstring \
+	php8.1-zip \
+	php8.1-uploadprogress \
 	unzip \
 	&& rm -rf /var/lib/apt/lists/* \
 	&& apt-get clean -y 
@@ -31,12 +31,12 @@ RUN cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.p
 RUN mkdir /var/www/.composer/
 
 # Enable apache mods.
-RUN a2enmod php7.4
+RUN a2enmod php8.1
 RUN a2enmod rewrite
 
 # Update the PHP.ini file, enable <? ?> tags and quieten logging.
-RUN sed -i "s/short_open_tag = Off/short_open_tag = On/" /etc/php/7.4/apache2/php.ini
-RUN sed -i "s/error_reporting = .*$/error_reporting = E_ERROR | E_WARNING | E_PARSE/" /etc/php/7.4/apache2/php.ini
+RUN sed -i "s/short_open_tag = Off/short_open_tag = On/" /etc/php/8.1/apache2/php.ini
+RUN sed -i "s/error_reporting = .*$/error_reporting = E_ERROR | E_WARNING | E_PARSE/" /etc/php/8.1/apache2/php.ini
 
 # Manually set up the apache environment variables
 ENV APACHE_RUN_USER www-data
