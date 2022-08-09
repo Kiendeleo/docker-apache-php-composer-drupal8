@@ -62,6 +62,8 @@ RUN chown -R www-data:www-data /var/www/site/public/
 RUN chown -R www-data:www-data /var/www/.composer/
 RUN cd /var/www/site/public && find . -type d -exec chmod u=rwx,g=rx,o= '{}' \;
 RUN cd /var/www/site/public && find . -type f -exec chmod u=rw,g=r,o= '{}' \;
+RUN chmod +x /var/www/site/public/vendor/drush/drush/drush
+RUN chmod +x /var/www/site/public/vendor/bin/drush
 
 # Update the default apache site with the config we created.
 ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
