@@ -5,10 +5,6 @@ MAINTAINER Kiendeleo <kiendeleo.com>
 # disable interactive functions. 
 ENV DEBIAN_FRONTEND noninteractive
 
-#Remove OpenSSL
-RUN apt-get -y remove openssl
-RUN apt-get autoremove -y
-
 # Install apache, php and supplimentary programs. also remove the list from the apt-get update at the end ;-)
 RUN apt-get update && \
 	apt-get install -y apache2 \
@@ -74,6 +70,10 @@ ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
 # By default, simply start apache.
 CMD /usr/sbin/apache2ctl -D FOREGROUND
+
+#Remove OpenSSL
+RUN apt-get -y remove openssl
+RUN apt-get autoremove -y
 
 # expose container at port 80
 EXPOSE 80
