@@ -75,5 +75,9 @@ CMD /usr/sbin/apache2ctl -D FOREGROUND
 RUN apt-get -y remove openssl
 RUN apt-get autoremove -y
 
+#Change permisions of Composer Cache
+RUN mkdir /var/www/.cache/
+RUN chown -R www-data:www-data /var/www/.cache/
+
 # expose container at port 80
 EXPOSE 80
