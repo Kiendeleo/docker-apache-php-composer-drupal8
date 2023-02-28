@@ -71,10 +71,6 @@ ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 # By default, simply start apache.
 CMD /usr/sbin/apache2ctl -D FOREGROUND
 
-#Remove OpenSSH
-RUN apt-get -y remove openssh
-RUN apt-get autoremove -y
-
 #Add Open SSL
 RUN apt-get -y install openssl
 
