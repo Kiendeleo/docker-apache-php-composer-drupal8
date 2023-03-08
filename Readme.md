@@ -1,5 +1,5 @@
 # Drupal Composer
-This container starts with a Ubuntu Server image and layers on apache2, php7.2 and composer.  It then creates Drupal 8 website using Composer.
+This container starts with a Ubuntu Server image and layers on apache2, php7.2 and composer.  It then creates Drupal 10 website using Composer.
 
 ## Tags
 `22.04` This is the only maintaned version. It stayes with the current LTS version of Ubuntu
