@@ -15,7 +15,7 @@ docker run -d -p 80:80 --name [AppName] kiendeleo/drupalcomposer:[Tag]
 - Run command for Persistance: docker run -d -v drupal:/var/www/site -v php:/etc/php/ -v apache:/etc/apache2/sites-enabled/ kiendeleo/drupalcomposer:latest
 
 ## Things still left to do:
-- SSH (Self signed cert)
+- SSH (Self-signed cert)
 
 ## Credits
 Based on what i've learned from this:
