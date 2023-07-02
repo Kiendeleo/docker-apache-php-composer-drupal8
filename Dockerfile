@@ -8,7 +8,7 @@ ENV DEBIAN_FRONTEND noninteractive
 # Install apache, php and supplimentary programs. also remove the list from the apt-get update at the end ;-)
 RUN apt-get update && \
 	apt-get install -y apache2 \
-	libapache2-mod-php7.4 \
+	libapache2-mod-php8.1 \
 	php8.1-mysql \
 	php8.1-gd \
 	php8.1-bcmath \
