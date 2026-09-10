@@ -22,6 +22,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# php8.5-opcache is not a separate package on Ubuntu 26.04; OPcache ships in php8.5-common.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       apache2 \
@@ -35,7 +36,6 @@ RUN apt-get update \
       php${PHP_VERSION}-curl \
       php${PHP_VERSION}-gd \
       php${PHP_VERSION}-bcmath \
-      php${PHP_VERSION}-opcache \
       php${PHP_VERSION}-xml \
       php${PHP_VERSION}-mbstring \
       php${PHP_VERSION}-zip \
@@ -58,6 +58,7 @@ RUN printf '%s\n' \
       'max_execution_time = 120' \
       'upload_max_filesize = 32M' \
       'post_max_size = 32M' \
+      'opcache.enable = 1' \
     > /etc/php/${PHP_VERSION}/apache2/conf.d/99-drupal.ini \
  && cp /etc/php/${PHP_VERSION}/apache2/conf.d/99-drupal.ini /etc/php/${PHP_VERSION}/cli/conf.d/99-drupal.ini
 
