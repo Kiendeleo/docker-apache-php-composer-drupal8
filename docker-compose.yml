@@ -1,0 +1,32 @@
+services:
+  drupal:
+    build: .
+    image: kiendeleo/drupalcomposer:24.04
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-files:/var/www/site/public/web/sites/default/files
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-changeme}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-drupal}
+      MYSQL_USER: ${MYSQL_USER:-drupal}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-changeme}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  drupal-files:
+  db-data:
