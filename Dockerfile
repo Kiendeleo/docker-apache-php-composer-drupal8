@@ -1,89 +1,85 @@
-FROM ubuntu:24.04
+ARG UBUNTU_VERSION=26.04
+FROM ubuntu:${UBUNTU_VERSION}
 
-MAINTAINER Kiendeleo <kiendeleo.com>
+LABEL org.opencontainers.image.title="Drupal Composer Apache" \
+      org.opencontainers.image.description="Ubuntu 26.04, PHP 8.5, Drupal 11 recommended-project" \
+      org.opencontainers.image.source="https://github.com/Kiendeleo/docker-apache-php-composer-drupal8" \
+      org.opencontainers.image.authors="Kiendeleo <kiendeleo.com>"
 
-# disable interactive functions. 
-ENV DEBIAN_FRONTEND noninteractive
+ARG PHP_VERSION=8.5
+ARG DRUPAL_VERSION=11.4.6
 
-# Install apache, php and supplimentary programs. also remove the list from the apt-get update at the end ;-)
-RUN apt-get update && \
-	apt-get install -y apache2 \
-	libapache2-mod-php8.3 \
-	php8.3 \
- 	php8.3-cli \
- 	php8.3-common \
- 	php8.3-mysql \
-  	php8.3-curl \
-	php8.3-gd \
-	php8.3-bcmath \
- 	php8.3-opcache \
-  	php8.3-readline \
-   	php8.3-xml \
-	php8.3-soap \
-	php-pear \
-	php8.3-apcu \
-	php8.3-fpm \
-	php8.3-curl \
-	curl lynx-common lynx \
-	php8.3-mbstring \
-	php8.3-zip \
-	php8.3-uploadprogress \
-	unzip \
-	git \
-	nano \
-	wget \
-	&& rm -rf /var/lib/apt/lists/* \
-	&& apt-get clean -y 
-# Install composer for PHP dependencies
-RUN cd /tmp && curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer
+ENV DEBIAN_FRONTEND=noninteractive \
+    PHP_VERSION=${PHP_VERSION} \
+    DRUPAL_VERSION=${DRUPAL_VERSION} \
+    APACHE_RUN_USER=www-data \
+    APACHE_RUN_GROUP=www-data \
+    APACHE_LOG_DIR=/var/log/apache2 \
+    APACHE_LOCK_DIR=/var/lock/apache2 \
+    APACHE_PID_FILE=/var/run/apache2.pid \
+    COMPOSER_ALLOW_SUPERUSER=0 \
+    COMPOSER_HOME=/var/www/.composer
 
-# Add the temp folder for composers's cache
-RUN mkdir /var/www/.composer/
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Enable apache mods.
-RUN a2enmod php8.3
-RUN a2enmod rewrite
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+      apache2 \
+      ca-certificates \
+      curl \
+      libapache2-mod-php${PHP_VERSION} \
+      php${PHP_VERSION} \
+      php${PHP_VERSION}-cli \
+      php${PHP_VERSION}-common \
+      php${PHP_VERSION}-mysql \
+      php${PHP_VERSION}-curl \
+      php${PHP_VERSION}-gd \
+      php${PHP_VERSION}-bcmath \
+      php${PHP_VERSION}-opcache \
+      php${PHP_VERSION}-xml \
+      php${PHP_VERSION}-mbstring \
+      php${PHP_VERSION}-zip \
+      php${PHP_VERSION}-intl \
+      php${PHP_VERSION}-apcu \
+      php${PHP_VERSION}-soap \
+      unzip \
+ && a2enmod php${PHP_VERSION} rewrite headers \
+ && rm -rf /var/lib/apt/lists/*
 
-# Update the PHP.ini file, enable <? ?> tags and quieten logging.
-RUN sed -i "s/short_open_tag = Off/short_open_tag = On/" /etc/php/8.3/apache2/php.ini
-RUN sed -i "s/error_reporting = .*$/error_reporting = E_ERROR | E_WARNING | E_PARSE/" /etc/php/8.3/apache2/php.ini
+RUN printf '%s\n' \
+      'short_open_tag = Off' \
+      'display_errors = Off' \
+      'display_startup_errors = Off' \
+      'log_errors = On' \
+      'error_reporting = E_ALL' \
+      'expose_php = Off' \
+      'allow_url_fopen = On' \
+      'memory_limit = 256M' \
+      'max_execution_time = 120' \
+      'upload_max_filesize = 32M' \
+      'post_max_size = 32M' \
+    > /etc/php/${PHP_VERSION}/apache2/conf.d/99-drupal.ini \
+ && cp /etc/php/${PHP_VERSION}/apache2/conf.d/99-drupal.ini /etc/php/${PHP_VERSION}/cli/conf.d/99-drupal.ini
 
-# Manually set up the apache environment variables
-ENV APACHE_RUN_USER www-data
-ENV APACHE_RUN_GROUP www-data
-ENV APACHE_LOG_DIR /var/log/apache2
-ENV APACHE_LOCK_DIR /var/lock/apache2
-ENV APACHE_PID_FILE /var/run/apache2.pid
+COPY apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
-# Make working directories.
-RUN mkdir /var/www/site
-RUN mkdir /var/www/site/public
+RUN mkdir -p /var/www/site/public /var/www/.composer /var/www/.cache \
+ && chown -R www-data:www-data /var/www/site /var/www/.composer /var/www/.cache \
+ && su -s /bin/bash www-data -c "composer create-project drupal/recommended-project:${DRUPAL_VERSION} /var/www/site/public --no-interaction --no-progress" \
+ && su -s /bin/bash www-data -c "composer require drush/drush --working-dir=/var/www/site/public --no-interaction --no-progress" \
+ && mkdir -p /var/www/site/public/web/sites/default/files \
+ && chown -R root:www-data /var/www/site/public \
+ && find /var/www/site/public -type d -exec chmod 0750 {} \; \
+ && find /var/www/site/public -type f -exec chmod 0640 {} \; \
+ && chown -R www-data:www-data /var/www/site/public/web/sites/default \
+ && chmod 0770 /var/www/site/public/web/sites/default /var/www/site/public/web/sites/default/files \
+ && if [ -d /var/www/site/public/vendor/bin ]; then chmod 0750 /var/www/site/public/vendor/bin/*; fi
 
-# Create Drupal 8 site using Composer
-RUN composer create-project drupal/recommended-project /var/www/site/public
-RUN cd /var/www/site/public && composer require drush/drush
-RUN cd /var/www/site/public && composer install --prefer-dist
+WORKDIR /var/www/site/public
 
-# Adjust File Permissions 
-RUN chown -R www-data:www-data /var/www/site/public/
-RUN chown -R www-data:www-data /var/www/.composer/
-RUN cd /var/www/site/public && find . -type d -exec chmod u=rwx,g=rx,o= '{}' \;
-RUN cd /var/www/site/public && find . -type f -exec chmod u=rw,g=r,o= '{}' \;
-RUN chmod +x /var/www/site/public/vendor/drush/drush/drush
-RUN chmod +x /var/www/site/public/vendor/bin/drush
-
-# Update the default apache site with the config we created.
-ADD apache-config.conf /etc/apache2/sites-enabled/000-default.conf
-
-# By default, simply start apache.
-CMD /usr/sbin/apache2ctl -D FOREGROUND
-
-#Add Open SSL
-RUN apt-get -y install openssl
-
-#Change permisions of Composer Cache
-RUN mkdir /var/www/.cache/
-RUN chown -R www-data:www-data /var/www/.cache/
-
-# expose container at port 80
 EXPOSE 80
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD curl -fsS http://127.0.0.1/ >/dev/null || exit 1
+
+CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]

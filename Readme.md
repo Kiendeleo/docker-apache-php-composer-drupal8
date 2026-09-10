@@ -1,26 +1,59 @@
-# Drupal Composer
-This container starts with a Ubuntu Server image and layers on apache2, php7.2 and composer.  It then creates Drupal 10 website using Composer.
+# Drupal Composer (Ubuntu 26.04 / Drupal 11)
+
+Ubuntu 26.04 LTS image with Apache, PHP 8.5, Composer 2, and a pinned Drupal 11 recommended-project install.
+
+Drupal 8 and 9 are EOL and are not built from this branch.
 
 ## Tags
-`22.04` This is the only maintaned version. It stayes with the current LTS version of Ubuntu
 
-## How to use this container
+| Branch / tag | Ubuntu | PHP | Drupal |
+|---|---|---|---|
+| `26.04` | 26.04 LTS | 8.5 | 11.4.6 |
+| `24.04` | 24.04 LTS | 8.3 | 10.6.16 |
+| `22.04` | legacy branch, unmaintained | | |
 
-docker run -d -p 80:80 --name [AppName] kiendeleo/drupalcomposer:[Tag]
+## Run
 
-## Persistance Volumes
-- Apache directives: apache:/etc/apache2/sites-enabled/
-- PHP.ini: php:/etc/php/
-- Site Files: drupal:/var/www/site/
-- Run command for Persistance: docker run -d -v drupal:/var/www/site -v php:/etc/php/ -v apache:/etc/apache2/sites-enabled/ kiendeleo/drupalcomposer:latest
+```bash
+docker compose up --build -d
+```
 
-## Things still left to do:
-- SSH (Self-signed cert)
+Then open http://localhost:8080 and complete the Drupal installer.
 
-## Credits
-Based on what i've learned from this:
-- [SpiralOutDotEu/docker-apache-php-composer](https://github.com/SpiralOutDotEu/docker-apache-php-composer)
-- [nimmis/apache-php5](https://hub.docker.com/r/nimmis/apache-php5/~/dockerfile/)
-- [webdevops/php-boilerplate](https://hub.docker.com/r/webdevops/php-boilerplate/~/dockerfile/)
-- [Dan Pupius@Medium:Apache and PHP on Docker](https://medium.com/dev-tricks/apache-and-php-on-docker-44faef716150#.5bz3h5mgy)
-- [Yunes Rafie@sitepoint:Docker and Dockerfiles Made Easy!](http://www.sitepoint.com/docker-and-dockerfiles-made-easy/)
+Database settings for Compose:
+
+- Host: `db`
+- Database: `drupal`
+- Username: `drupal`
+- Password: value of `MYSQL_PASSWORD` (default `changeme`)
+
+Copy `.env.example` to `.env` and change the passwords before any non-local use.
+
+Single container (you must supply your own database):
+
+```bash
+docker build -t kiendeleo/drupalcomposer:26.04 .
+docker run -d -p 8080:80 --name drupal11 kiendeleo/drupalcomposer:26.04
+```
+
+## Persistence
+
+Compose already persists uploaded files and MariaDB data.
+
+Useful bind mounts if you run the image directly:
+
+- Site files: `/var/www/site/public/web/sites/default/files`
+- PHP config: `/etc/php/8.5/`
+- Apache vhost: `/etc/apache2/sites-enabled/`
+
+## What this branch changed
+
+- Pinned Drupal 11.4.6 instead of whatever Packagist returns at build time
+- Official Composer image instead of `curl | php`
+- Dropped unused packages (`lynx`, `nano`, `git`, `php-fpm`)
+- Added `php-intl` and a Drupal PHP drop-in (`display_errors=Off`, `expose_php=Off`)
+- Tightened Apache (no directory listing, no 2.2 `Order` syntax, security headers, no PHP in `files/`)
+- Application code owned by `root:www-data`; only `sites/default` is writable by the web user
+- Healthcheck and Compose stack with MariaDB 11
+
+Put TLS in front of this container (Caddy, Traefik, or a host reverse proxy). The image itself still listens on HTTP port 80.

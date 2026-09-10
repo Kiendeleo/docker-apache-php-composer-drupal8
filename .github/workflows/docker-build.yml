@@ -1,0 +1,15 @@
+name: Build image
+
+on:
+  push:
+    branches: ["26.04"]
+  pull_request:
+    branches: ["26.04"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t kiendeleo/drupalcomposer:26.04 .
