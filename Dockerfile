@@ -24,6 +24,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     COMPOSER_HOME=/var/www/.composer
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY check-php2shell.sh /usr/local/bin/check-php2shell.sh
 
 # php8.5-opcache is not a separate package on Ubuntu 26.04; OPcache ships in php8.5-common.
 RUN apt-get update \
@@ -48,14 +49,7 @@ RUN apt-get update \
       php${PHP_VERSION}-soap \
       unzip \
  && a2enmod php${PHP_VERSION} rewrite headers \
- && modphp_ver="$(dpkg-query -W -f='$${Version}' "libapache2-mod-php${PHP_VERSION}")" \
- && common_ver="$(dpkg-query -W -f='$${Version}' "php${PHP_VERSION}-common")" \
- && if ! dpkg --compare-versions "$$modphp_ver" ge "${PHP_MIN_PACKAGE}" \
-      || ! dpkg --compare-versions "$$common_ver" ge "${PHP_MIN_PACKAGE}"; then \
-      echo "PHP is older than ${PHP_MIN_PACKAGE} (php2shell CVE-2026-109618 CVE-2026-109619, USN-8948-1). libapache2-mod-php${PHP_VERSION}=$$modphp_ver php${PHP_VERSION}-common=$$common_ver" >&2; \
-      exit 1; \
-    fi \
- && echo "php2shell check ok: libapache2-mod-php${PHP_VERSION}=$$modphp_ver php${PHP_VERSION}-common=$$common_ver" \
+ && PHP_VERSION="${PHP_VERSION}" PHP_MIN_PACKAGE="${PHP_MIN_PACKAGE}" sh /usr/local/bin/check-php2shell.sh \
  && rm -rf /var/lib/apt/lists/*
 
 RUN printf '%s\n' \
