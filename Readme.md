@@ -46,6 +46,12 @@ Useful bind mounts if you run the image directly:
 - PHP config: `/etc/php/8.5/`
 - Apache vhost: `/etc/apache2/sites-enabled/`
 
+## Logs
+
+`docker logs` shows Apache and PHP. Apache's main error log, which is where `mod_php` writes warnings and fatals, goes to stderr. The access log goes to stdout. `display_errors` stays off, so a visitor does not see the error text. `/var/log/apache2/error.log` inside the container is not used.
+
+Drupal's own watchdog messages still go to the database unless the site enables the core Syslog module.
+
 ## php2shell
 
 Apache `mod_php` is the highest-risk SAPI for php2shell (CVE-2026-109618 and CVE-2026-109619). Ubuntu 26.04 backports the fix and `php -v` still prints 8.5.4. The package revision is what matters.
@@ -60,6 +66,7 @@ There is no configuration workaround that closes both bugs. Updating the package
 - Fail the image build if the Ubuntu PHP packages are older than the php2shell fix
 - Set `zend.assertions = -1` in the PHP drop-in, which current Drupal recommends for production and which cannot be set from `.htaccess`
 - Allow Drupal's `.htaccess` to use `Require`, `Options`, and `DirectoryIndex`. `AllowOverride FileInfo` alone makes Apache return 500 for every request
+- Send Apache and PHP error logs to stderr, and the access log to stdout, so `docker logs` shows them
 - Official Composer image instead of `curl | php`
 - Dropped unused packages (`lynx`, `nano`, `git`, `php-fpm`)
 - Added `php-intl` and a Drupal PHP drop-in (`display_errors=Off`, `expose_php=Off`)

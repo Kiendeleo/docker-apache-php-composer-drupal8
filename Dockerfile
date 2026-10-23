@@ -83,6 +83,18 @@ RUN mkdir -p /var/www/site/public /var/www/.composer /var/www/.cache \
  && chmod 0770 /var/www/site/public/web/sites/default /var/www/site/public/web/sites/default/files \
  && if [ -d /var/www/site/public/vendor/bin ]; then chmod 0750 /var/www/site/public/vendor/bin/*; fi
 
+# mod_php writes PHP errors to Apache's main ErrorLog, not the vhost one.
+# The vhost ErrorLog can be stderr and these messages still land in
+# /var/log/apache2/error.log until the main log is stderr too.
+# Drupal's .htaccess sets zend.assertions per request. PHP rejects that
+# when the ini value is -1 and would log a warning on every hit.
+RUN sed -i 's#^ErrorLog .*#ErrorLog /proc/self/fd/2#' /etc/apache2/apache2.conf \
+ && printf '%s\n' 'ServerName localhost' > /etc/apache2/conf-available/fqdn.conf \
+ && a2enconf fqdn \
+ && if grep -q 'php_value zend.assertions' /var/www/site/public/web/.htaccess; then \
+      sed -i '/php_value zend.assertions/d' /var/www/site/public/web/.htaccess; \
+    fi
+
 WORKDIR /var/www/site/public
 
 EXPOSE 80
