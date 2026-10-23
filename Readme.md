@@ -8,7 +8,7 @@ Drupal 8 and 9 are EOL and are not built from this branch.
 
 | Branch / tag | Ubuntu | PHP | Drupal |
 |---|---|---|---|
-| `26.04` | 26.04 LTS | 8.5 | 11.4.6 |
+| `26.04` | 26.04 LTS | 8.5 | 11.4.11 |
 | `24.04` | 24.04 LTS | 8.3 | 10.6.16 |
 | `22.04` | legacy branch, unmaintained | | |
 
@@ -46,9 +46,19 @@ Useful bind mounts if you run the image directly:
 - PHP config: `/etc/php/8.5/`
 - Apache vhost: `/etc/apache2/sites-enabled/`
 
+## php2shell
+
+Apache `mod_php` is the highest-risk SAPI for php2shell (CVE-2026-109618 and CVE-2026-109619). Ubuntu 26.04 backports the fix and `php -v` still prints 8.5.4. The package revision is what matters.
+
+The build refuses to finish unless `libapache2-mod-php8.5` and `php8.5-common` are at least `8.5.4-0ubuntu1.5` ([USN-8948-1](https://ubuntu.com/security/notices/USN-8948-1)). Rebuild and recreate the container after pulling this change. A container that is already running keeps the old PHP until it is replaced.
+
+There is no configuration workaround that closes both bugs. Updating the packages is the fix.
+
 ## What this branch changed
 
-- Pinned Drupal 11.4.6 instead of whatever Packagist returns at build time
+- Pinned Drupal 11.4.11, which includes the 11.4.10 security fixes (SA-CORE-2026-014 and the October 2026 core advisories), instead of whatever Packagist returns at build time
+- Fail the image build if the Ubuntu PHP packages are older than the php2shell fix
+- Set `zend.assertions = -1` in the PHP drop-in, which current Drupal recommends for production and which cannot be set from `.htaccess`
 - Official Composer image instead of `curl | php`
 - Dropped unused packages (`lynx`, `nano`, `git`, `php-fpm`)
 - Added `php-intl` and a Drupal PHP drop-in (`display_errors=Off`, `expose_php=Off`)

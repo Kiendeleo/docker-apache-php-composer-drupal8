@@ -7,7 +7,10 @@ LABEL org.opencontainers.image.title="Drupal Composer Apache" \
       org.opencontainers.image.authors="Kiendeleo <kiendeleo.com>"
 
 ARG PHP_VERSION=8.5
-ARG DRUPAL_VERSION=11.4.6
+# php2shell (CVE-2026-109618, CVE-2026-109619) is fixed in USN-8948-1.
+# Ubuntu keeps the upstream number at 8.5.4 and puts the fix in the package revision.
+ARG PHP_MIN_PACKAGE=8.5.4-0ubuntu1.5
+ARG DRUPAL_VERSION=11.4.11
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PHP_VERSION=${PHP_VERSION} \
@@ -24,6 +27,7 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # php8.5-opcache is not a separate package on Ubuntu 26.04; OPcache ships in php8.5-common.
 RUN apt-get update \
+ && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y --no-install-recommends \
       apache2 \
       ca-certificates \
@@ -44,6 +48,14 @@ RUN apt-get update \
       php${PHP_VERSION}-soap \
       unzip \
  && a2enmod php${PHP_VERSION} rewrite headers \
+ && modphp_ver="$(dpkg-query -W -f='$${Version}' "libapache2-mod-php${PHP_VERSION}")" \
+ && common_ver="$(dpkg-query -W -f='$${Version}' "php${PHP_VERSION}-common")" \
+ && if ! dpkg --compare-versions "$$modphp_ver" ge "${PHP_MIN_PACKAGE}" \
+      || ! dpkg --compare-versions "$$common_ver" ge "${PHP_MIN_PACKAGE}"; then \
+      echo "PHP is older than ${PHP_MIN_PACKAGE} (php2shell CVE-2026-109618 CVE-2026-109619, USN-8948-1). libapache2-mod-php${PHP_VERSION}=$$modphp_ver php${PHP_VERSION}-common=$$common_ver" >&2; \
+      exit 1; \
+    fi \
+ && echo "php2shell check ok: libapache2-mod-php${PHP_VERSION}=$$modphp_ver php${PHP_VERSION}-common=$$common_ver" \
  && rm -rf /var/lib/apt/lists/*
 
 RUN printf '%s\n' \
@@ -58,6 +70,7 @@ RUN printf '%s\n' \
       'max_execution_time = 120' \
       'upload_max_filesize = 32M' \
       'post_max_size = 32M' \
+      'zend.assertions = -1' \
       'opcache.enable = 1' \
     > /etc/php/${PHP_VERSION}/apache2/conf.d/99-drupal.ini \
  && cp /etc/php/${PHP_VERSION}/apache2/conf.d/99-drupal.ini /etc/php/${PHP_VERSION}/cli/conf.d/99-drupal.ini
