@@ -59,6 +59,7 @@ There is no configuration workaround that closes both bugs. Updating the package
 - Pinned Drupal 10.6.20, which includes the 10.6.19 security fixes (SA-CORE-2026-014 and the October 2026 core advisories), instead of whatever Packagist returns at build time
 - Fail the image build if the Ubuntu PHP packages are older than the php2shell fix
 - Set `zend.assertions = -1` in the PHP drop-in, which Drupal 10.6.20 recommends for production and which cannot be set from `.htaccess`
+- Allow Drupal's `.htaccess` to use `Require`, `Options`, and `DirectoryIndex`. `AllowOverride FileInfo` alone makes Apache return 500 for every request
 - Official Composer image instead of `curl | php`
 - Dropped unused packages (`lynx`, `nano`, `git`, `php-fpm`)
 - Added `php-intl` and a Drupal PHP drop-in (`display_errors=Off`, `expose_php=Off`)
