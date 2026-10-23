@@ -50,7 +50,7 @@ Useful bind mounts if you run the image directly:
 
 `docker logs` shows Apache and PHP. Apache's main error log, which is where `mod_php` writes warnings and fatals, goes to stderr. The access log goes to stdout. `display_errors` stays off, so a visitor does not see the error text. `/var/log/apache2/error.log` inside the container is not used.
 
-The image healthcheck requests `/healthz.txt`. A check of `/` would send `Host: 127.0.0.1`, and Drupal returns 400 for that when `trusted_host_patterns` does not include it. `curl` then treats the container as unhealthy even though the public site is fine.
+The healthcheck requests `/healthz.txt`, then `/` if that file is missing. A volume on `/var/www/site` hides the image's `healthz.txt`. Drupal returns 400 for `Host: 127.0.0.1` when `trusted_host_patterns` does not include it, and that response still counts as healthy because Apache and PHP answered.
 
 Drupal's own watchdog messages still go to the database unless the site enables the core Syslog module.
 

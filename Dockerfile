@@ -101,10 +101,10 @@ WORKDIR /var/www/site/public
 
 EXPOSE 80
 
-# Hit a real file. A request to / uses Host 127.0.0.1, which Drupal
-# rejects with 400 when trusted_host_patterns is set, and curl -f then
-# marks a working site unhealthy.
+COPY docker-healthcheck.sh /usr/local/bin/docker-healthcheck.sh
+RUN chmod 755 /usr/local/bin/docker-healthcheck.sh
+
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD curl -fsS --max-time 5 http://127.0.0.1/healthz.txt >/dev/null || exit 1
+  CMD ["/usr/local/bin/docker-healthcheck.sh"]
 
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
