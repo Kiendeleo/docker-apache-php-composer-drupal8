@@ -93,13 +93,18 @@ RUN sed -i 's#^ErrorLog .*#ErrorLog /proc/self/fd/2#' /etc/apache2/apache2.conf 
  && a2enconf fqdn \
  && if grep -q 'php_value zend.assertions' /var/www/site/public/web/.htaccess; then \
       sed -i '/php_value zend.assertions/d' /var/www/site/public/web/.htaccess; \
-    fi
+    fi \
+ && printf 'ok\n' > /var/www/site/public/web/healthz.txt \
+ && chmod 0644 /var/www/site/public/web/healthz.txt
 
 WORKDIR /var/www/site/public
 
 EXPOSE 80
 
+# Hit a real file. A request to / uses Host 127.0.0.1, which Drupal
+# rejects with 400 when trusted_host_patterns is set, and curl -f then
+# marks a working site unhealthy.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
-  CMD curl -fsS http://127.0.0.1/ >/dev/null || exit 1
+  CMD curl -fsS --max-time 5 http://127.0.0.1/healthz.txt >/dev/null || exit 1
 
 CMD ["/usr/sbin/apache2ctl", "-D", "FOREGROUND"]
