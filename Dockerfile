@@ -70,10 +70,15 @@ RUN printf '%s\n' \
 
 COPY apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
+# CVE-2026-45070 is fixed in symfony/mime 6.4.49.
+# Drupal 10.6.20 allows ~v6.4.40, so take the newest release in that range.
+# composer update re-scaffolds .htaccess; the next step strips zend.assertions.
 RUN mkdir -p /var/www/site/public /var/www/.composer /var/www/.cache \
  && chown -R www-data:www-data /var/www/site /var/www/.composer /var/www/.cache \
  && su -s /bin/bash www-data -c "composer create-project drupal/recommended-project:${DRUPAL_VERSION} /var/www/site/public --no-interaction --no-progress" \
  && su -s /bin/bash www-data -c "composer require drush/drush --working-dir=/var/www/site/public --no-interaction --no-progress" \
+ && su -s /bin/bash www-data -c "composer update symfony/mime --with-dependencies --working-dir=/var/www/site/public --no-interaction --no-progress" \
+ && su -s /bin/bash www-data -c "composer audit --no-interaction --working-dir=/var/www/site/public" \
  && mkdir -p /var/www/site/public/web/sites/default/files \
  && chown -R root:www-data /var/www/site/public \
  && find /var/www/site/public -type d -exec chmod 0750 {} \; \
