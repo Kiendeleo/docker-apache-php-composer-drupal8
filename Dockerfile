@@ -71,10 +71,15 @@ RUN printf '%s\n' \
 
 COPY apache-config.conf /etc/apache2/sites-enabled/000-default.conf
 
+# Drupal 11.4.11's lock pins symfony/mime 7.4.19 (CVE-2026-45070).
+# core-recommended allows ~v7.4.13, so the update stays inside that range.
+# composer update re-scaffolds .htaccess; the next step strips zend.assertions.
 RUN mkdir -p /var/www/site/public /var/www/.composer /var/www/.cache \
  && chown -R www-data:www-data /var/www/site /var/www/.composer /var/www/.cache \
  && su -s /bin/bash www-data -c "composer create-project drupal/recommended-project:${DRUPAL_VERSION} /var/www/site/public --no-interaction --no-progress" \
  && su -s /bin/bash www-data -c "composer require drush/drush --working-dir=/var/www/site/public --no-interaction --no-progress" \
+ && su -s /bin/bash www-data -c "composer update symfony/mime --with-dependencies --working-dir=/var/www/site/public --no-interaction --no-progress" \
+ && su -s /bin/bash www-data -c "composer audit --no-interaction --working-dir=/var/www/site/public" \
  && mkdir -p /var/www/site/public/web/sites/default/files \
  && chown -R root:www-data /var/www/site/public \
  && find /var/www/site/public -type d -exec chmod 0750 {} \; \

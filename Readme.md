@@ -65,6 +65,7 @@ There is no configuration workaround that closes both bugs. Updating the package
 ## What this branch changed
 
 - Pinned Drupal 11.4.11, which includes the 11.4.10 security fixes (SA-CORE-2026-014 and the October 2026 core advisories), instead of whatever Packagist returns at build time
+- Update `symfony/mime` to 7.4.22 after install. Drupal 11.4.11's lock still has 7.4.19, which is affected by CVE-2026-45070, and `drupal/core-recommended` allows `~v7.4.13`. The build fails if `composer audit` still reports an advisory
 - Fail the image build if the Ubuntu PHP packages are older than the php2shell fix
 - Set `zend.assertions = -1` in the PHP drop-in, which current Drupal recommends for production and which cannot be set from `.htaccess`
 - Allow Drupal's `.htaccess` to use `Require`, `Options`, and `DirectoryIndex`. `AllowOverride FileInfo` alone makes Apache return 500 for every request
